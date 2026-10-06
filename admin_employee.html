@@ -1,0 +1,267 @@
+ 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN CATEGORY</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='product_inventory.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .btn-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+        }
+
+        .search-container {
+            transition: margin 0.3s ease;
+        }
+
+        /* SHIFT CLASSES */
+        .shifted-left { margin-left: 200px; }
+        .shifted-right { margin-right: 25%; } /* matches order panel width */
+        .shifted-left-time, .shifted-right-time { transition: margin 0.3s ease; }
+
+         /* UPGRADE: Use a wrapper to handle shifting via CSS instead of heavy JS manipulation */
+        body[data-sidebar="open"] .buttons-container,
+        body[data-sidebar="open"] .search-container { margin-left: 200px; transition: 0.3s; }
+        
+        body[data-order="open"] .buttons-container,
+        body[data-order="open"] .search-container,
+        body[data-order="open"] .big-display { margin-right: 25%; transition: 0.3s; }
+
+        .big-display { min-height: 400px; padding: 20px; }
+        .hidden { display: none !important; }
+
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="sidebar">
+        <div class="p-3">
+            <h5>{{ user.personal_name }}</h5>
+            <p>{{ user.job_desc }}</p>
+        </div>
+        <ul class="list-unstyled ps-3">
+            <li>
+                <a href="{{ url_for('dashboard') }}">Point_of_sales</a>
+            </li>
+            <li>
+                <a href="{{ url_for('activity_billing_queue') }}">Activity</a>
+            </li>
+            <li>
+                <a href="{{ url_for('audit_logs') }}">Audit logs</a>
+            </li>
+            <li>
+                <a href="{{ url_for('product_inventory') }}">Inventory</a>
+            </li>
+            <li>
+                <a href="{{ url_for('admin_employee') }}">Admin Employees</a> <!-- NEW LINK -->
+            </li>
+            <li><a href="#">Teams</a></li>
+            <li><a href="#">Settings</a></li>
+        </ul>
+    </div>
+
+    <!-- ORDER PANEL -->
+    <div id="orderContainer" class="order-container">
+        
+    </div>
+
+    <!-- TOP BAR -->
+    <div class="top-bar d-flex align-items-center">
+        <div id="menuToggle" class="menu-icon">&#9776;</div>
+        <div class="date-box ms-3 top-bar-item">
+           <button class="icon-button">
+                <img src="{{ url_for('static', filename='images/calendar_icon.jpg') }}" 
+                    alt="date_icon" 
+                    class="icon-img">
+           </button>
+          <span id="dateText">--/--/----</span>
+        </div>
+
+        <div class="time-box ms-3 top-bar-item">
+            <button class="icon-button">
+                <img src="{{ url_for('static', filename='images/clock_icon.jpg') }}" 
+                    alt="date_icon" 
+                    class="icon-img">
+           </button>
+            <span id="timeText">--:--:--</span>
+        </div>
+        <div id="orderToggle" class="ms-auto open-order top-bar-item">Open Order</div>
+    </div>
+
+    <!-- BUTTON CONTAINER AS HORIZONTAL NAV -->
+    <div id="buttonsContainer" class="buttons-container">
+       <button class="dashboard-btn1">ADMIN#1</button>
+	   <button class="dashboard-btn2">ADMIN#2</button> 
+	   <button class="dashboard-btn3">ADMIN#3</button>
+	   <button class="dashboard-btn4">ADMIN#4</button>
+    </div>
+
+    <!-- SEARCH BAR -->
+    <div id="searchContainer" class="search-container mt-3">
+        <div class="input-group">
+            <input type="text" id="searchInput" placeholder="Search for something sweet on your mind" class="form-control">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+        </div>
+    </div>
+    
+    <!-- BIG DISPLAY SCREEN -->
+    <div id="bigDisplay" class="big-display">
+        <!-- content goes here -->
+    </div>
+
+
+<script>
+    // --- GLOBAL STATE & ELEMENTS ---
+    const bigDisplay = document.getElementById('bigDisplay');
+    const orderToggle = document.getElementById('orderToggle');
+    const sidebar = document.getElementById('sidebar');
+    const orderContainer = document.getElementById('orderContainer');
+    
+    // TEMPORARY DATA STORE (SITS OUTSIDE LISTENERS)
+    let tempData = {};
+    let tempGroups = [];
+    let clickCounts = { admin: 0, product: 0 };
+
+    // --- DATE & TIME ---
+    function updateDateTime() {
+        const now = new Date();
+        document.getElementById('dateText').textContent = now.toLocaleDateString();
+        document.getElementById('timeText').textContent = now.toLocaleTimeString();
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    // --- UI CONTROL (UPGRADES: Data-Attribute Logic) ---
+    function toggleUI(type, isOpen) {
+        if (type === 'sidebar') {
+            document.body.setAttribute('data-sidebar', isOpen ? 'open' : 'closed');
+            if (isOpen) toggleUI('order', false); // Auto-close order if sidebar opens
+        } else {
+            document.body.setAttribute('data-order', isOpen ? 'open' : 'closed');
+            if (isOpen) toggleUI('sidebar', false); // Auto-close sidebar if order opens
+        }
+    }
+
+    // --- EVENT LISTENERS ---
+    document.getElementById('menuToggle').addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        toggleUI('sidebar', sidebar.classList.contains('active'));
+    });
+
+    orderToggle.addEventListener('click', () => {
+        const isActive = orderContainer.classList.toggle('active');
+        orderToggle.textContent = isActive ? "Close Order" : "Open Order";
+        toggleUI('order', isActive);
+        
+        if (!isActive) {
+            // "solve an era": Fixed missing element reference check
+            const subtotal = document.querySelector('.subtotal-amount');
+            if(subtotal) subtotal.textContent = '$0.00';
+            tempData = {}; 
+        }
+    });
+
+    // --- ADMIN ACTIONS (Add Employee) ---
+    document.querySelector('.dashboard-btn1').addEventListener('click', () => {
+        clickCounts.admin++;
+        if (clickCounts.admin === 3) {
+            bigDisplay.classList.add('hidden');
+            clickCounts.admin = 0;
+            return;
+        }
+
+        bigDisplay.classList.remove('hidden');
+        bigDisplay.innerHTML = `
+            <div class="form-container p-4 border rounded bg-light">
+                <h2 class="mb-4">Add New Employee</h2>
+                ${['username', 'personal_name', 'user_password', 'job_desc'].map(field => `
+                    <div class="mb-3">
+                        <label class="form-label">${field.replace('_', ' ').toUpperCase()}:</label>
+                        <div class="input-group">
+                            <input id="${field}" type="${field === 'user_password' ? 'password' : 'text'}" class="form-control" placeholder="Enter ${field}">
+                            <button onclick="saveField('${field}')" class="btn btn-outline-primary">Save</button>
+                        </div>
+                    </div>
+                `).join('')}
+                <div class="mb-3">
+                    <label class="form-label">User Groups:</label>
+                    <select id="groups" class="form-select" multiple>
+                        {% for group in groups %}
+                        <option value="{{ group.USER_GROUPS_number }}">{{ group.USER_GROUPS }}</option>
+                        {% endfor %}
+                    </select>
+                    <button onclick="saveGroups()" class="btn btn-outline-secondary w-100 mt-2">Lock Groups</button>
+                </div>
+                <button class="btn btn-success w-100 mt-3" onclick="submitAll()">Submit Employee</button>
+            </div>`;
+    });
+
+    // --- FORM LOGIC (Global Scope) ---
+    window.saveField = (id) => {
+        const val = document.getElementById(id).value;
+        if(!val) return alert("Field cannot be empty");
+        tempData[id] = val;
+        console.log(`${id} cached`);
+    };
+
+    window.saveGroups = () => {
+        const select = document.getElementById("groups");
+        tempGroups = Array.from(select.selectedOptions).map(o => o.value);
+        alert("Groups locked.");
+    };
+
+    window.submitAll = async () => {
+        const required = ['username', 'personal_name', 'user_password', 'job_desc'];
+        if (!required.every(key => tempData[key])) return alert("Save all fields first!");
+
+        try {
+            const res = await fetch('/add_employee', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ ...tempData, group_ids: tempGroups })
+            });
+            const data = await res.json();
+            if(data.success) location.reload();
+            else alert("Error: " + data.error);
+        } catch (err) { alert("Network Error"); }
+    };
+
+    // --- ACTIVITY TABLE ---
+    document.querySelector('.dashboard-btn2').addEventListener('click', async () => {
+        bigDisplay.classList.remove('hidden');
+        bigDisplay.innerHTML = '<div class="spinner-border text-primary"></div>';
+
+        const res = await fetch('/get_user_activity');
+        const data = await res.json();
+
+        let rows = data.activities.map(r => {
+            let status = 'inactive';
+            if (r.last_login) {
+                const diff = (new Date() - new Date(r.last_login)) / (1000 * 60 * 60 * 24);
+                if (diff <= 7) status = '<span class="badge bg-success">Active</span>';
+                else status = '<span class="badge bg-secondary">Inactive</span>';
+            }
+            return `<tr>
+                <td>${r.user_id || ''}</td>
+                <td>${r.name || ''}</td>
+                <td>${r.username || ''}</td>
+                <td>${r.login_count || 0}</td>
+                <td>${status}</td>
+            </tr>`;
+        }).join('');
+
+        bigDisplay.innerHTML = `<table class="table table-hover mt-3">
+            <thead class="table-dark"><tr><th>ID</th><th>Name</th><th>User</th><th>Logins</th><th>Status</th></tr></thead>
+            <tbody>${rows}</tbody></table>`;
+    });
+</script>
+</body>
+</html>

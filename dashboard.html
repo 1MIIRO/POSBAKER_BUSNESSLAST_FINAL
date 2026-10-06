@@ -309,13 +309,24 @@
         </button>
     </div>
                                                                             
-    <!-- SEARCH BAR -->
 <div id="searchContainer" class="search-container mt-3">
-        <div class="input-group">
-            <input type="text" id="searchInput" placeholder="Search for something sweet on your mind" class="form-control">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-        </div>
+    <div class="input-group">
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search for something sweet on your mind"
+            class="form-control"
+        >
+
+        <span
+            class="input-group-text"
+            id="searchIcon"
+            style="cursor:pointer;"
+        >
+            <i class="bi bi-search"></i>
+        </span>
     </div>
+</div>
   
      <!-- Product Display -->
 <div class="product-display">
@@ -1051,7 +1062,22 @@
 
 
       // Select the container
-      const trackOrdersContainer = document.querySelector('#trackDrawerContent .track-scroll');
+const trackOrdersContainer = document.querySelector('#trackDrawerContent .track-scroll');
+const trackDrawer = document.getElementById('trackDrawer');
+const trackHandle = document.getElementById('trackHandle');
+const trackSymbol = document.getElementById('trackSymbol');
+
+trackHandle.addEventListener('click', () => {
+    trackDrawer.classList.toggle('open');
+
+    if (trackDrawer.classList.contains('open')) {
+        trackSymbol.textContent = '−';
+    } else {
+        trackSymbol.textContent = '+';
+    }
+});
+
+
 
         async function fetchNewOrderNumber() {
             try {
@@ -1166,6 +1192,27 @@
             userProfileModal.style.display = 'none';
         }
     });
+
+
+     const searchInput = document.getElementById("searchInput");
+const searchIcon = document.getElementById("searchIcon");
+
+searchIcon.addEventListener("click", function () {
+
+    const USER_SEARCH_OPTION = searchInput.value.trim().toLowerCase();
+
+    document.querySelectorAll(".product-card").forEach(function (card) {
+
+        const productName =
+            (card.getAttribute("data-name") || "").toLowerCase();
+
+        card.style.display =
+            productName.includes(USER_SEARCH_OPTION)
+                ? ""
+                : "none";
+    });
+
+});
 
         </script>
 

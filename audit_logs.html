@@ -61,9 +61,326 @@
 
     /* Hover effect */
     table.audit-table tr:hover { background-color: #f1f1f1; }
+
+   
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+
+    background: #222;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    padding-top: 20px;
+
+    transition: width 0.3s ease;
+
+    color: white;
+
+    z-index: 2000;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.active {
+    width: 170px;
+}
+
+
+/* SIDEBAR LINKS */
+
+.sidebar a {
+    display: block;
+
+    padding: 10px 0;
+
+    color: #ddd;
+
+    text-decoration: none;
+
+    white-space: nowrap;
+}
+
+.sidebar a:hover {
+    color: white;
+}
+
+
+/* SIDEBAR USER INFORMATION */
+
+.sidebar h5 {
+    color: white;
+    white-space: nowrap;
+}
+
+.sidebar p {
+    color: #aaa;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   SIDEBAR FOOTER
+   ========================================================= */
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 15px;
+}
+
+.logout-btn {
+    display: block;
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    color: #dc3545 !important;
+
+    text-align: center;
+
+    text-decoration: none;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    font-weight: 700;
+
+    border: none;
+}
+
+.logout-btn:hover {
+    background: #fff5f5;
+
+    color: #dc3545 !important;
+}
+
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.top-bar {
+    display: flex;
+
+    align-items: center;
+
+    width: 100%;
+
+    min-height: 50px;
+
+    transition:
+        margin-left 0.3s ease,
+        width 0.3s ease;
+}
+
+
+/* =========================================================
+   MENU ICON
+   ========================================================= */
+
+.menu-icon {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    font-size: 28px;
+
+    color: #222;
+
+    transition:
+        margin-left 0.3s ease;
+}
+
+ 
+/* TOP BAR */
+.top-bar {
+    width: 100%;
+    background: #ffffff;
+    padding: 10px;
+    color: #000000;
+    font-weight: bold;
+}
+
+/* DATE AND TIME NUMBERS */
+#dateText,
+#timeText {
+    color: #000000;
+}
+
+
+/* =========================================================
+   DATE / TIME
+   ========================================================= */
+
+.top-bar-item {
+    transition:
+        margin-left 0.3s ease;
+}
+
+.date-box,
+.time-box {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+.icon-button {
+    border: none;
+
+    background: transparent;
+
+    padding: 0;
+
+    cursor: pointer;
+}
+
+.icon-img {
+    width: 30px;
+    height: 30px;
+
+    object-fit: cover;
+
+    border-radius: 4px;
+}
+
+
+/* =========================================================
+   SIDEBAR SHIFT
+   ========================================================= */
+
+body {
+    overflow-x: hidden;
+}
+
+
+/*
+   Your Dashboard uses 250px for the left-side shift.
+   This makes the Audit Logs page follow that same movement.
+*/
+
+body.sidebar-shifted .top-bar {
+    margin-left: 250px;
+
+    width: calc(100% - 250px);
+}
+
+body.sidebar-shifted h2 {
+    margin-left: 250px;
+}
+
+body.sidebar-shifted .table-container {
+    margin-left: 250px;
+
+    width: calc(100% - 250px);
+}
+
+
+/* =========================================================
+   SMOOTH MOVEMENT
+   ========================================================= */
+
+h2 {
+    transition:
+        margin-left 0.3s ease;
+}
+
+.table-container {
+    transition:
+        margin-left 0.3s ease,
+        width 0.3s ease;
+}
+
+
+body.sidebar-shifted .menu-icon {
+    margin-left: 0;
+}
+
+
+/* TOP BAR */
+.top-bar {
+    width: 100%;
+    background: #edeff0;
+    padding: 10px;
+    color: white;
+    font-weight: bold;
+}
+
+.menu-icon {
+    font-size: 26px;
+    cursor: pointer;
+    color: blue;  /* Make hamburger icon blue */
+}
+
+
+
 </style>
 </head>
     <body>
+
+            <div id="sidebar" class="sidebar">
+                <div class="p-3">
+                    <h5>{{ user.personal_name }}</h5>
+                    <p>{{ user.job_desc }}</p>
+                </div>
+
+                <ul class="list-unstyled ps-3">
+                    <li><a href="{{ url_for('dashboard') }}">Point_of_sales</a></li>
+                    <li><a href="{{ url_for('activity_billing_queue') }}">Activity</a></li>
+                    <li><a href="{{ url_for('audit_logs') }}">Audit logs</a></li>
+                    <li><a href="{{ url_for('product_inventory') }}">Inventory</a></li>
+                    <li><a href="{{ url_for('admin_employee') }}">Admin Employees</a></li>
+                    <li><a href="#" id="userProfileButton">User Profile</a></li>
+                    <li><a href="#">Settings</a></li>
+                </ul>
+
+                <div class="sidebar-footer">
+                    <a href="/logout" class="logout-btn">Logout</a>
+                </div>
+            </div>
+
+        <!-- TOP BAR -->
+            <div class="top-bar d-flex align-items-center">
+                <div id="menuToggle" class="menu-icon">&#9776;</div>
+                <div class="date-box ms-3 top-bar-item">
+                <button class="icon-button">
+                        <img src="{{ url_for('static', filename='images/calendar_icon.jpg') }}" 
+                            alt="date_icon" 
+                            class="icon-img">
+                </button>
+                <span id="dateText">--/--/----</span>
+                </div>
+
+                <div class="time-box ms-3 top-bar-item">
+                    <button class="icon-button">
+                        <img src="{{ url_for('static', filename='images/clock_icon.jpg') }}" 
+                            alt="date_icon" 
+                            class="icon-img">
+                </button>
+                    <span id="timeText">--:--:--</span>
+                </div>
+            
+            </div>
 
             <h2>Audit Logs</h2>
 
@@ -154,6 +471,78 @@
 
                 // Refresh table every 5 seconds
                 setInterval(fetchAuditLogs, 5000);
+
+                    
+      
+// =========================================================
+// SIDEBAR ELEMENTS
+// =========================================================
+
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
+
+
+// =========================================================
+// SIDEBAR SHIFT FUNCTION
+// =========================================================
+
+function shiftUI(shiftSidebar) {
+
+    if (shiftSidebar) {
+
+        document.body.classList.add('sidebar-shifted');
+
+    } else {
+
+        document.body.classList.remove('sidebar-shifted');
+
+    }
+}
+
+
+// =========================================================
+// MENU TOGGLE
+// =========================================================
+
+menuToggle.addEventListener('click', function () {
+
+    sidebar.classList.toggle('active');
+
+    const sidebarIsOpen =
+        sidebar.classList.contains('active');
+
+    shiftUI(sidebarIsOpen);
+
+});
+
+
+// =========================================================
+// CLOSE SIDEBAR WHEN CLICKING INSIDE SIDEBAR
+// =========================================================
+
+sidebar.addEventListener('click', function () {
+
+    sidebar.classList.remove('active');
+
+    shiftUI(false);
+
+});
+
+  function updateDateTime() {
+            const now = new Date();
+            document.getElementById('dateText').textContent = now.toLocaleDateString();
+            document.getElementById('timeText').textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+
+
+
+
+
+
+
 
             </script>
 
