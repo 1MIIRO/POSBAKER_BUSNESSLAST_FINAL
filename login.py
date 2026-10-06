@@ -1248,8 +1248,17 @@ def activity_Tables():
 
 @app.route('/audit_logs')
 def audit_logs():
-    # Fetch logs or render template
-    return render_template('audit_logs.html')
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+
+    # Get user info from session
+    user_info = {
+        "user_name": session.get('user_name'),
+        "personal_name": session.get('personal_name'),
+        "job_desc": session.get('job_desc')
+    }
+
+    return render_template('audit_logs.html', user=user_info)
 
 @app.route('/get_audit_logs')
 def get_audit_logs():
